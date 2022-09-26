@@ -121,8 +121,24 @@ const authMiddleware = async (req, res, next) => {
     next();
 }
 
+const adminMiddleware = (req, res, next) => {
+    let { wpInfo, sess } = req.cookies;
+    if (!wpInfo || !sess) return res.status(400).end('Access Denied.');
+    let userAgent = req.headers['user-agent'];
+    let ipAddr = process.env.NODE_ENV == "development" ? "45.126.3.252" : req.headers['x-forwarded-for'];
+
+    if (!isValidSess(sess, userAgent, ipAddr)) return res.status(400).end('Session is invalid.');
+    
+    let wpInfoDecoded = JSON.parse(base64.decode(wpInfo));
+    if (!wpInfoDecoded.user.isAdmin) return res.status(400).end('Restricted Access.');
+    if (!sessionMapper.get(`${wpInfoDecoded.site}-${wpInfoDecoded.user.id}`)) sessionMapper.set(`${wpInfoDecoded.site}-${wpInfoDecoded.user.id}`, sess);
+    // if (sessionMapper.get(`${wpInfoDecoded.site}-${wpInfoDecoded.user.id}`) !== sess) return res.status(400).end('Multiple Browsers is not allowed.');
+    next();
+}
+
 module.exports = {
     notFoundMiddleware,
     errorHandleMiddleware,
-    authMiddleware
+    authMiddleware,
+    adminMiddleware
 }

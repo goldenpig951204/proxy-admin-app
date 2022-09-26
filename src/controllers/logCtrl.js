@@ -5,7 +5,6 @@ const getLogs = (req, res) => {
     try {
         let logs = [];
         fs.readdirSync(path.join(__dirname, "../public/logs/")).forEach((file, idx) => {
-            console.log(file)
             if (path.extname(file) == ".log") {
                 logs.push({ name: path.basename(file) });
             }
