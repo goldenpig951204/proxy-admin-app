@@ -21,7 +21,7 @@ const login = async (req, res) => {
             "user-agent-hash": crypto.createHash("sha1").update(email).digest("hex").substring(0, 32)
         });
         let { data } = await axios.instance.post(
-            `${process.env.SEMRUSH_DOMAIN}/sso/authorize`,
+            "https://www.semrush.com/sso/authorize",
             body, 
             {
                 headers: {
@@ -33,7 +33,7 @@ const login = async (req, res) => {
             }
         );
         if (data.user_id) {
-            let cookie = axios.cookieJar.getCookieStringSync(process.env.SEMRUSH_DOMAIN);
+            let cookie = axios.cookieJar.getCookieStringSync("https://www.semrush.com");
             await settingModel.updateOne(null, { 
                 semrushCookie: cookie 
             });
